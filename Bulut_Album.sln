@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bulut_Album", "Bulut_Album\Bulut_Album.csproj", "{3AEE54B2-7408-48B5-8805-C88F89D957BB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3AEE54B2-7408-48B5-8805-C88F89D957BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AEE54B2-7408-48B5-8805-C88F89D957BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AEE54B2-7408-48B5-8805-C88F89D957BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AEE54B2-7408-48B5-8805-C88F89D957BB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {70693863-2910-40C9-B33C-01A696B07B89}
+	EndGlobalSection
+EndGlobal

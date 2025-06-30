@@ -1,0 +1,6 @@
+@Bulut_Album_HostAddress = http://localhost:5062
+
+GET {{Bulut_Album_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
