@@ -18,8 +18,8 @@ namespace Bulut_Album.Services
         {
             var claims = new[]
             {
-        new Claim("CustomerId", customerId)
-    };
+                new Claim("CustomerId", customerId)
+            };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

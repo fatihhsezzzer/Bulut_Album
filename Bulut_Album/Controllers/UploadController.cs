@@ -1,5 +1,6 @@
 ﻿using Bulut_Album.Data;
 using Bulut_Album.Models;
+using Bulut_Album.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +23,7 @@ namespace MyUploadApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Upload([FromForm] UploadRequest request)
         {
-            var customerId = User.FindFirst("CustomerId")?.Value;
+            var customerId = Guid.Parse(User.FindFirst("CustomerId")?.Value);
 
             if (request.File == null || request.File.Length == 0)
                 return BadRequest("Dosya boş.");
@@ -35,7 +36,7 @@ namespace MyUploadApi.Controllers
             if (!allowedTypes.Contains(request.File.ContentType))
                 return BadRequest("Sadece resim dosyası yükleyebilirsiniz (jpg/png).");
 
-            var folder = Path.Combine(_env.ContentRootPath, "Uploads", customerId);
+            var folder = Path.Combine(_env.ContentRootPath, "Uploads", customerId.ToString());
             Directory.CreateDirectory(folder);
 
             var filePath = Path.Combine(folder, Guid.NewGuid() + Path.GetExtension(request.File.FileName));
@@ -45,10 +46,10 @@ namespace MyUploadApi.Controllers
                 await request.File.CopyToAsync(stream);
             }
 
-            _context.UploadLogs.Add(new UploadLog
+            _context.Media.Add(new Media
             {
                 FileName = request.File.FileName,
-                SavedPath = filePath,
+                FilePath = filePath,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 CustomerId = customerId,
