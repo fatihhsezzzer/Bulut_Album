@@ -4,10 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Bulut_Album.Services;
 using Bulut_Album.Data;
-using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
-var env = builder.Environment;
 
 // Add services
 builder.Services.AddControllers();
@@ -31,8 +29,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddSingleton<TokenService>(new TokenService(key));
 
-// Kendi DbContext'in burada tanýmlý olmalý
-builder.Services.AddDbContext<AppDbContext>(options =>
+// DbContext
+builder.Services.AddDbContext<DbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
@@ -44,17 +42,6 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseStaticFiles(); // wwwroot içinden dosya sunumu
-
-// Uploads klasörünü dýþa aç
-var uploadsPath = Path.Combine(env.ContentRootPath, "Uploads");
-Directory.CreateDirectory(uploadsPath);
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(uploadsPath),
-    RequestPath = "/uploads"
-});
 
 app.MapControllers();
 

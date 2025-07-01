@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Bulut_Album.Data;
+﻿using Bulut_Album.Data;
 using Bulut_Album.Models;
-using Microsoft.Extensions.FileProviders;
-
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MyUploadApi.Controllers
 {
@@ -32,6 +30,7 @@ namespace MyUploadApi.Controllers
             if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))
                 return BadRequest("İsim ve soyisim gerekli.");
 
+            // Sadece resim kontrolü
             var allowedTypes = new[] { "image/jpeg", "image/png" };
             if (!allowedTypes.Contains(request.File.ContentType))
                 return BadRequest("Sadece resim dosyası yükleyebilirsiniz (jpg/png).");
@@ -39,8 +38,7 @@ namespace MyUploadApi.Controllers
             var folder = Path.Combine(_env.ContentRootPath, "Uploads", customerId);
             Directory.CreateDirectory(folder);
 
-            var fileName = Guid.NewGuid() + Path.GetExtension(request.File.FileName);
-            var filePath = Path.Combine(folder, fileName);
+            var filePath = Path.Combine(folder, Guid.NewGuid() + Path.GetExtension(request.File.FileName));
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
@@ -49,7 +47,7 @@ namespace MyUploadApi.Controllers
 
             _context.UploadLogs.Add(new UploadLog
             {
-                FileName = fileName,
+                FileName = request.File.FileName,
                 SavedPath = filePath,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
@@ -62,27 +60,6 @@ namespace MyUploadApi.Controllers
             return Ok("Yükleme başarılı.");
         }
 
-        // ✅ Fotoğrafları listeleme endpoint’i
-        [Authorize]
-        [HttpGet("list")]
-        public IActionResult ListUploads()
-        {
-            var customerId = User.FindFirst("CustomerId")?.Value;
 
-            var uploads = _context.UploadLogs
-                .Where(u => u.CustomerId == customerId)
-                .OrderByDescending(u => u.UploadDate)
-                .Select(u => new
-                {
-                    u.FileName,
-                    u.FirstName,
-                    u.LastName,
-                    u.UploadDate,
-                    Url = $"https://{Request.Host}/uploads/{customerId}/{u.FileName}"
-                })
-                .ToList();
-
-            return Ok(uploads);
-        }
     }
 }
