@@ -1,4 +1,4 @@
-﻿using Bulut_Album.Models;
+﻿using Bulut_Album.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bulut_Album.Data
@@ -7,6 +7,7 @@ namespace Bulut_Album.Data
     {
         public AppDbContext(DbContextOptions options) : base(options) { }
 
-        public DbSet<UploadLog> UploadLogs { get; set; }
+        public DbSet<Customer> Customer { get; set; }
+        public DbSet<Media> Media { get; set; }
     }
 }
