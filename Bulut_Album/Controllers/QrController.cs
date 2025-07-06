@@ -20,7 +20,7 @@ namespace Bulut_Album.Controllers
         }
 
         [HttpGet("{customerId}")]
-        public IActionResult GenerateQr(string customerId)
+        public IActionResult GenerateQr(Guid customerId)
         {
             // 1. Token oluştur
             var token = _tokenService.GenerateCustomerUploadToken(customerId);

@@ -13,7 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // JWT Ayarý
-var key = "gizli-upload-api-key-123456";
+var key = "super-secret-upload-api-key-12345678";
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -27,7 +27,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// TokenService (manuel key ile)
 builder.Services.AddSingleton<TokenService>(new TokenService(key));
+
+// JwtService (IConfiguration kullanýr)
+builder.Services.AddScoped<JwtService>();
+
+builder.Services.AddSingleton<S3Service>();
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>

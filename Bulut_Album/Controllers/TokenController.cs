@@ -13,7 +13,7 @@ public class TokenController : ControllerBase
     }
 
     [HttpGet("{customerId}")]
-    public IActionResult GetToken(string customerId)
+    public IActionResult GetToken(Guid customerId)
     {
         var token = _tokenService.GenerateCustomerUploadToken(customerId);
         return Ok(new { token });

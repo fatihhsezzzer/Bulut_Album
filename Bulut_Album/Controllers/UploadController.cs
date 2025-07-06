@@ -13,13 +13,16 @@ namespace MyUploadApi.Controllers
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
 
-        public UploadController(AppDbContext context, IWebHostEnvironment env)
+        private readonly S3Service _s3Service;
+
+        public UploadController(AppDbContext context, IWebHostEnvironment env, S3Service s3Service)
         {
             _context = context;
             _env = env;
+            _s3Service = s3Service;
         }
 
-        [Authorize]
+
         [HttpPost]
         public async Task<IActionResult> Upload([FromForm] UploadRequest request)
         {
@@ -31,25 +34,22 @@ namespace MyUploadApi.Controllers
             if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))
                 return BadRequest("İsim ve soyisim gerekli.");
 
-            // Sadece resim kontrolü
             var allowedTypes = new[] { "image/jpeg", "image/png" };
             if (!allowedTypes.Contains(request.File.ContentType))
                 return BadRequest("Sadece resim dosyası yükleyebilirsiniz (jpg/png).");
 
-            var folder = Path.Combine(_env.ContentRootPath, "Uploads", customerId.ToString());
-            Directory.CreateDirectory(folder);
+            var newFileName = Guid.NewGuid() + Path.GetExtension(request.File.FileName);
 
-            var filePath = Path.Combine(folder, Guid.NewGuid() + Path.GetExtension(request.File.FileName));
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            string uploadedUrl;
+            using (var stream = request.File.OpenReadStream())
             {
-                await request.File.CopyToAsync(stream);
+                uploadedUrl = await _s3Service.UploadFileAsync(stream, $"customers/{customerId}/{newFileName}", request.File.ContentType);
             }
 
             _context.Media.Add(new Media
             {
                 FileName = request.File.FileName,
-                FilePath = filePath,
+                FilePath = uploadedUrl, // URL artık dosya yolu
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 CustomerId = customerId,
@@ -58,9 +58,8 @@ namespace MyUploadApi.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok("Yükleme başarılı.");
+            return Ok(new { message = "Yükleme başarılı.", url = uploadedUrl });
         }
-
 
     }
 }

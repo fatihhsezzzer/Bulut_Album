@@ -14,11 +14,12 @@ namespace Bulut_Album.Services
             _key = key;
         }
 
-        public string GenerateCustomerUploadToken(string customerId)
+        public string GenerateCustomerUploadToken(Guid customerId)
         {
             var claims = new[]
             {
-                new Claim("CustomerId", customerId)
+                new Claim("CustomerId", customerId.ToString())
+
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
@@ -26,7 +27,6 @@ namespace Bulut_Album.Services
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(90), // 90 gün geçerli QR
                 signingCredentials: creds
             );
 
