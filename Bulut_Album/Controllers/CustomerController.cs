@@ -4,6 +4,8 @@ using Bulut_Album.Models;
 using Bulut_Album.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Bulut_Album.Models.DTO.Customer;
+using Bulut_Album.Services;
 
 namespace Bulut_Album.Controllers
 {
@@ -12,23 +14,32 @@ namespace Bulut_Album.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly AppDbContext _context;
-
-        public CustomerController(AppDbContext context)
+        private readonly JwtService _jwtService;
+        public CustomerController(AppDbContext context, JwtService jwtService)
         {
             _context = context;
+            _jwtService = jwtService;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] Customer customer)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            if (await _context.Customers.AnyAsync(c => c.Email == customer.Email))
+            if (await _context.Customers.AnyAsync(c => c.Email == request.Email))
                 return BadRequest("Bu e-posta adresi zaten kayıtlı.");
 
-            customer.PasswordHash = PasswordHelper.HashPassword(customer.PasswordHash); // düz şifreyi hashliyoruz
-            await _context.Customers.AddAsync(customer);
+            request.Password = PasswordHelper.HashPassword(request.Password); // düz şifreyi hashliyoruz
+            _context.Customers.Add(new Customer
+            {
+                CustomerId = new Guid(),
+                Email = request.Email,
+                FullName = request.FullName,
+                PasswordHash = request.Password,
+                CreatedAt=DateTime.UtcNow,
+            });
+
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Kayıt başarılı", customerId = customer.CustomerId });
+            return Ok(new { message = "Kayıt başarılı"});
         }
 
         [HttpPost("login")]
@@ -38,8 +49,15 @@ namespace Bulut_Album.Controllers
             if (user == null || !PasswordHelper.VerifyPassword(model.Password, user.PasswordHash))
                 return Unauthorized("Geçersiz e-posta veya şifre.");
 
-            return Ok(new { message = "Giriş başarılı", customerId = user.CustomerId });
+            var token = _jwtService.GenerateToken(user.CustomerId, user.Email);
+
+            return Ok(new
+            {
+                message = "Giriş başarılı",
+                token = token,
+            });
         }
+
 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
@@ -55,15 +73,5 @@ namespace Bulut_Album.Controllers
         }
     }
 
-    public class LoginRequest
-    {
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
-
-    public class ResetPasswordRequest
-    {
-        public string Email { get; set; }
-        public string NewPassword { get; set; }
-    }
+ 
 }

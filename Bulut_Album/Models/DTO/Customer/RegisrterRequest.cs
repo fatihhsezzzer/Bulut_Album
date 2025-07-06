@@ -2,7 +2,7 @@
 
 namespace Bulut_Album.Models.DTO.Customer
 {
-    public class RegisrterRequest
+    public class RegisterRequest
     {
        
 
